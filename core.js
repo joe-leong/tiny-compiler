@@ -235,9 +235,38 @@ function transformer(ast) {
   return newAst;
 }
 
+/**
+ * 代码生成
+ * @param {object} node
+ */
+function codeGenerator(node) {
+  switch (node.type) {
+    case "Program":
+      return node.body.map(codeGenerator).join("\n");
+    case "CallExpression":
+      return (
+        codeGenerator(node.callee) +
+        "(" +
+        node.arguments.map(codeGenerator).join(",") +
+        ")"
+      );
+    case "ExpressionStatement":
+      return codeGenerator(node.expression) + ";";
+    case "Identifier":
+      return node.name;
+    case "NumberLiteral":
+      return node.value;
+    case "StringLiteral":
+      return '"' + node.value + '"';
+    default:
+      throw new TypeError(node.type);
+  }
+}
+
 module.exports = {
   tokenizer,
   parser,
   traverser,
-  transformer
+  transformer,
+  codeGenerator
 };
